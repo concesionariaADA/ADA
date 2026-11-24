@@ -5,3 +5,7 @@ out/
 .idea/
 *.iml
 .vscode/
+
+# Local agent state
+.claude/settings.local.json
+.engram/
