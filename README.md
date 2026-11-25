@@ -20,3 +20,21 @@ RN20 (Trazabilidad / Auditoría en Admin): Toda modificación de precio, cambio 
 RN21 (Identificación por Número de Legajo): Cada empleado (incluyendo todo vendedor que asiste a un cliente o gestiona un boleto) es identificado de forma única mediante un número de legajo único y obligatorio (no puede repetirse entre empleados ni quedar vacío).
 Trazabilidad del Vendedor en el Frontoffice y /admin: Cuando un cliente consulta o inicia una gestión desde el frontoffice asistido por un vendedor —o cuando un vendedor opera en /admin—, su legajo queda asociado a la atención/boleto para identificar quién asesoró y cerró la operación.
 RN22 (Identificación y Caracterización de Motocicletas): Toda motocicleta se identifica de forma única mediante su número de cuadro (equivalente al VIN como clave primaria / identificador único de unidad) y su número de motor (único). Además de los atributos generales de todo vehículo (marca, modelo, año, color, kilometraje, condición y estado), debe registrar obligatoriamente su cilindrada (en cc, valor entero positivo), su categoría de uso (URBANA, ENDURO, TRAIL) y su RN22 (Identificación y Caracterización de Motocicletas): Toda motocicleta se identifica de forma única mediante su número de cuadro (equivalente al VIN como clave primaria / identificador único de unidad) y su número de motor (único). Además de los atributos generales de todo vehículo (marca, modelo, año, color, kilometraje, condición y estado), debe registrar obligatoriamente su cilindrada (en cc, valor entero positivo), su categoría de uso (URBANA, ENDURO, TRAIL, SCOOTER) y su tipo de transmisión (AUTOMATICA, MECANICA).
+
+## Entorno de desarrollo
+
+Requisitos: JDK 17 o superior, Maven y Docker Desktop.
+
+La base de datos es PostgreSQL 17 y corre en Docker; no hace falta tener PostgreSQL instalado.
+
+1. Copiar la configuración local: `cp .env.example .env`. El `.env` no se commitea; si el puerto `5433` está ocupado, cambiar `POSTGRES_PORT` solo en tu `.env`.
+2. Levantar la base y pgAdmin: `docker compose up -d`.
+3. Compilar: `mvn compile`. La aplicación se conecta con `com.ada.persistencia.ConexionBaseDatos`, que lee los datos de conexión del `.env`.
+
+Acceso a la base:
+
+- Consola: `docker exec -it ada-postgres psql -U ada -d ada` (si cambiaste `POSTGRES_USER` o `POSTGRES_DB` en tu `.env`, usá esos valores).
+- pgAdmin: http://localhost:5050, con el usuario y la contraseña `PGADMIN_*` del `.env`. Para registrar el servidor usar host `postgres`, puerto `5432` y los datos `POSTGRES_*` del `.env`.
+- Otro cliente (DBeaver, IntelliJ): host `localhost`, puerto `POSTGRES_PORT` del `.env`.
+
+Comandos útiles: `docker compose stop` (detiene sin borrar datos) y `docker compose down -v` (borra los contenedores **y los datos**).
