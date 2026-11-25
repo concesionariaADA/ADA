@@ -4,7 +4,8 @@
 
 ## Sources scanned
 
-- C:\Users\Usuario\.claude\skills
+- .claude\skills
+- C:\Users\Juana\.claude\skills
 
 ## Contract
 
@@ -16,13 +17,7 @@
 
 | Skill | Trigger / description | Scope | Path |
 | --- | --- | --- | --- |
-| `n8n-code-javascript` | Write JavaScript code in n8n Code nodes. Use when writing JavaScript in n8n, using $input/$json/$node syntax, making HTTP requests with $helpers, working with dates using DateTime, troubleshooting Code node errors, choosing between Code node modes, or doing any custom data transformation in n8n. Always use this skill when a workflow needs a Code node — whether for data aggregation, filtering, API calls, format conversion, batch processing logic, or any custom JavaScript. Covers SplitInBatches loop patterns, cross-iteration data, pairedItem, and real-world production patterns. | user | `C:\Users\Usuario\.claude\skills\n8n-code-javascript\SKILL.md` |
-| `n8n-code-python` | Write Python code in n8n Code nodes. Use when writing Python in n8n, using _input/_json/_node syntax, working with standard library, or need to understand Python limitations in n8n Code nodes. Use this skill when the user specifically requests Python for an n8n Code node. Note — JavaScript is recommended for 95% of use cases — only use Python when the user explicitly prefers it or the task requires Python-specific standard library capabilities (regex, hashlib, statistics). | user | `C:\Users\Usuario\.claude\skills\n8n-code-python\SKILL.md` |
-| `n8n-expression-syntax` | Validate n8n expression syntax and fix common errors. Use when writing n8n expressions, using {{}} syntax, accessing $json/$node variables, troubleshooting expression errors, mapping data between nodes, or referencing webhook data in workflows. Use this skill whenever configuring node fields that reference data from previous nodes — expressions are how n8n passes data between nodes, and getting the syntax wrong is the most common source of workflow errors. | user | `C:\Users\Usuario\.claude\skills\n8n-expression-syntax\SKILL.md` |
-| `n8n-mcp-tools-expert` | Expert guide for using n8n-mcp MCP tools effectively. Use when searching for nodes, validating configurations, accessing templates, managing workflows, managing credentials, auditing instance security, or using any n8n-mcp tool. Provides tool selection guidance, parameter formats, and common patterns. IMPORTANT — Always consult this skill before calling any n8n-mcp tool — it prevents common mistakes like wrong nodeType formats, incorrect parameter structures, and inefficient tool usage. If the user mentions n8n, workflows, nodes, or automation and you have n8n MCP tools available, use this skill first. | user | `C:\Users\Usuario\.claude\skills\n8n-mcp-tools-expert\SKILL.md` |
-| `n8n-node-configuration` | Operation-aware node configuration guidance. Use when configuring nodes, understanding property dependencies, determining required fields, choosing between get_node detail levels, or learning common configuration patterns by node type. Always use this skill when setting up node parameters — it explains which fields are required for each operation, how displayOptions control field visibility, and when to use patchNodeField for surgical edits vs full node updates. | user | `C:\Users\Usuario\.claude\skills\n8n-node-configuration\SKILL.md` |
-| `n8n-validation-expert` | Interpret validation errors and guide fixing them. Use when encountering validation errors, validation warnings, false positives, operator structure issues, or need help understanding validation results. Also use when asking about validation profiles, error types, the validation loop process, or auto-fix capabilities. Consult this skill whenever a validate_node or validate_workflow call returns errors or warnings — it knows which warnings are false positives and which errors need real fixes. | user | `C:\Users\Usuario\.claude\skills\n8n-validation-expert\SKILL.md` |
-| `n8n-workflow-patterns` | Proven workflow architectural patterns from real n8n workflows. Use when building new workflows, designing workflow structure, choosing workflow patterns, planning workflow architecture, or asking about webhook processing, HTTP API integration, database operations, AI agent workflows, batch processing, or scheduled tasks. Always consult this skill when the user asks to create, build, or design an n8n workflow, automate a process, or connect services — even if they don't explicitly mention 'patterns'. Covers webhook, API, database, AI, batch processing, and scheduled automation architectures. | user | `C:\Users\Usuario\.claude\skills\n8n-workflow-patterns\SKILL.md` |
+| `issue` | Start work on a GitHub Issue of concesionariaADA/ADA — load its scope plus the cited business rules (RN) and decisions (D) from Issue #1, check blockers, and create the issue branch. Use as /issue <N>. | project | `C:\utnpg\ADA\.claude\skills\issue\SKILL.md` |
 
 ## Loading protocol
 
