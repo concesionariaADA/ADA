@@ -78,12 +78,26 @@
     return obtenerJsonAdmin("/api/admin/marcas");
   }
 
+  // GET /api/admin/tipos-vehiculo -> [{"id": n, "nombre": "AUTOMOVIL", "tipoVpic": "car"|null,
+  // "marcas": n, "modelos": n}], ordered by id.
+  function tiposVehiculo() {
+    return obtenerJsonAdmin("/api/admin/tipos-vehiculo");
+  }
+
+  // GET /api/admin/modelos -> [{"id": n, "modelIdVpic": n|null, "nombre": "...",
+  // "marca": "...", "tipo": "AUTOMOVIL", "baja": bool}], ordered by brand and model.
+  function modelos() {
+    return obtenerJsonAdmin("/api/admin/modelos");
+  }
+
   window.Api = Object.freeze({
     salud: salud,
     iniciarSesion: iniciarSesion,
     cerrarSesion: cerrarSesion,
     sesion: sesion,
     dashboard: dashboard,
-    marcas: marcas
+    marcas: marcas,
+    tiposVehiculo: tiposVehiculo,
+    modelos: modelos
   });
 })();

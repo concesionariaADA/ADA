@@ -2,7 +2,9 @@ package com.ada.servidor;
 
 import com.ada.autenticacion.ServicioAutenticacion;
 import com.ada.catalogo.Marca;
-import com.ada.catalogo.RepositorioMarcas;
+import com.ada.catalogo.Modelo;
+import com.ada.catalogo.RepositorioCatalogo;
+import com.ada.catalogo.TipoVehiculo;
 import com.ada.panel.RepositorioPanel;
 import com.ada.panel.ResumenPanel;
 import com.sun.net.httpserver.HttpExchange;
@@ -31,9 +33,13 @@ import java.util.Optional;
  *   <li>{@code GET /api/admin/dashboard} — dashboard counts as JSON (only when a
  *       {@link RepositorioPanel} is given); 500 {@code {"ok":false}} on a database error.
  *       The session filter guards it like every other {@code /api/admin} path.</li>
- *   <li>{@code GET /api/admin/marcas} — brands of the local catalog with their vehicle types,
- *       as a JSON array ordered by name (only when a {@link RepositorioMarcas} is given);
- *       500 {@code {"ok":false}} on a database error.</li>
+ *   <li>Catalog lists, only when a {@link RepositorioCatalogo} is given; each one answers
+ *       a JSON array, or 500 {@code {"ok":false}} on a database error:
+ *     <ul>
+ *       <li>{@code GET /api/admin/marcas} — brands with their vehicle types, ordered by name.</li>
+ *       <li>{@code GET /api/admin/tipos-vehiculo} — vehicle types with brand and model counts.</li>
+ *       <li>{@code GET /api/admin/modelos} — models with their brand and type.</li>
+ *     </ul></li>
  * </ul>
  * Any other path answers 404 JSON. Without a {@link ServicioAutenticacion} every path
  * answers 404. Passwords are never logged.
@@ -45,6 +51,8 @@ final class ManejadorApiAdmin implements HttpHandler {
     static final String RUTA_SESION = "/api/admin/sesion";
     static final String RUTA_DASHBOARD = "/api/admin/dashboard";
     static final String RUTA_MARCAS = "/api/admin/marcas";
+    static final String RUTA_TIPOS_VEHICULO = "/api/admin/tipos-vehiculo";
+    static final String RUTA_MODELOS = "/api/admin/modelos";
 
     /** Largest login body accepted, in bytes. */
     static final int CUERPO_MAXIMO = 4096;
@@ -55,7 +63,7 @@ final class ManejadorApiAdmin implements HttpHandler {
 
     private final ServicioAutenticacion autenticacion;
     private final RepositorioPanel repositorioPanel;
-    private final RepositorioMarcas repositorioMarcas;
+    private final RepositorioCatalogo repositorioCatalogo;
 
     /** @param autenticacion login service, or null for no endpoints (all 404) */
     ManejadorApiAdmin(ServicioAutenticacion autenticacion) {
@@ -71,15 +79,15 @@ final class ManejadorApiAdmin implements HttpHandler {
     }
 
     /**
-     * @param autenticacion     login service, or null for no endpoints (all 404)
-     * @param repositorioPanel  dashboard counts, or null for no dashboard endpoint (404)
-     * @param repositorioMarcas brand list, or null for no brands endpoint (404)
+     * @param autenticacion       login service, or null for no endpoints (all 404)
+     * @param repositorioPanel    dashboard counts, or null for no dashboard endpoint (404)
+     * @param repositorioCatalogo catalog lists, or null for no catalog endpoints (404)
      */
     ManejadorApiAdmin(ServicioAutenticacion autenticacion, RepositorioPanel repositorioPanel,
-                      RepositorioMarcas repositorioMarcas) {
+                      RepositorioCatalogo repositorioCatalogo) {
         this.autenticacion = autenticacion;
         this.repositorioPanel = repositorioPanel;
-        this.repositorioMarcas = repositorioMarcas;
+        this.repositorioCatalogo = repositorioCatalogo;
     }
 
     @Override
@@ -97,8 +105,13 @@ final class ManejadorApiAdmin implements HttpHandler {
                 consultarSesion(intercambio);
             } else if (RUTA_DASHBOARD.equals(ruta) && repositorioPanel != null) {
                 consultarDashboard(intercambio);
-            } else if (RUTA_MARCAS.equals(ruta) && repositorioMarcas != null) {
-                consultarMarcas(intercambio);
+            } else if (RUTA_MARCAS.equals(ruta) && repositorioCatalogo != null) {
+                consultarLista(intercambio, "brands", () -> jsonMarcas(repositorioCatalogo.listarMarcas()));
+            } else if (RUTA_TIPOS_VEHICULO.equals(ruta) && repositorioCatalogo != null) {
+                consultarLista(intercambio, "vehicle types",
+                        () -> jsonTipos(repositorioCatalogo.listarTiposVehiculo()));
+            } else if (RUTA_MODELOS.equals(ruta) && repositorioCatalogo != null) {
+                consultarLista(intercambio, "models", () -> jsonModelos(repositorioCatalogo.listarModelos()));
             } else {
                 noEncontrado(intercambio);
             }
@@ -200,27 +213,36 @@ final class ManejadorApiAdmin implements HttpHandler {
                 + ",\"empleados\":" + resumen.empleados() + "}");
     }
 
-    private void consultarMarcas(HttpExchange intercambio) throws IOException {
+    /** Reads one catalog list already rendered as JSON. */
+    @FunctionalInterface
+    private interface ConsultaJson {
+        String ejecutar() throws SQLException;
+    }
+
+    private void consultarLista(HttpExchange intercambio, String descripcion, ConsultaJson consulta)
+            throws IOException {
         if (!soloMetodo(intercambio, "GET")) {
             return;
         }
-        List<Marca> marcas;
+        String json;
         try {
-            marcas = repositorioMarcas.listar();
+            json = consulta.ejecutar();
         } catch (SQLException e) {
-            System.err.println("Admin brands: database error (SQLState " + e.getSQLState() + ")");
+            System.err.println("Admin " + descripcion + ": database error (SQLState " + e.getSQLState() + ")");
             Respuestas.enviarJson(intercambio, 500, RECHAZO);
             return;
         } catch (IllegalStateException e) {
-            System.err.println("Admin brands: " + e.getMessage());
+            System.err.println("Admin " + descripcion + ": " + e.getMessage());
             Respuestas.enviarJson(intercambio, 500, RECHAZO);
             return;
         }
+        Respuestas.enviarJson(intercambio, 200, json);
+    }
+
+    static String jsonMarcas(List<Marca> marcas) {
         StringBuilder json = new StringBuilder("[");
         for (Marca marca : marcas) {
-            if (json.length() > 1) {
-                json.append(',');
-            }
+            separar(json);
             json.append("{\"id\":").append(marca.id())
                     .append(",\"makeIdVpic\":").append(marca.makeIdVpic())
                     .append(",\"nombre\":").append(Respuestas.textoJson(marca.nombre()))
@@ -231,7 +253,41 @@ final class ManejadorApiAdmin implements HttpHandler {
             json.append("],\"habilitada\":").append(marca.habilitada())
                     .append(",\"baja\":").append(marca.baja()).append('}');
         }
-        Respuestas.enviarJson(intercambio, 200, json.append(']').toString());
+        return json.append(']').toString();
+    }
+
+    static String jsonTipos(List<TipoVehiculo> tipos) {
+        StringBuilder json = new StringBuilder("[");
+        for (TipoVehiculo tipo : tipos) {
+            separar(json);
+            json.append("{\"id\":").append(tipo.id())
+                    .append(",\"nombre\":").append(Respuestas.textoJson(tipo.nombre()))
+                    .append(",\"tipoVpic\":")
+                    .append(tipo.tipoVpic() == null ? "null" : Respuestas.textoJson(tipo.tipoVpic()))
+                    .append(",\"marcas\":").append(tipo.marcas())
+                    .append(",\"modelos\":").append(tipo.modelos()).append('}');
+        }
+        return json.append(']').toString();
+    }
+
+    static String jsonModelos(List<Modelo> modelos) {
+        StringBuilder json = new StringBuilder("[");
+        for (Modelo modelo : modelos) {
+            separar(json);
+            json.append("{\"id\":").append(modelo.id())
+                    .append(",\"modelIdVpic\":").append(modelo.modelIdVpic())
+                    .append(",\"nombre\":").append(Respuestas.textoJson(modelo.nombre()))
+                    .append(",\"marca\":").append(Respuestas.textoJson(modelo.marca()))
+                    .append(",\"tipo\":").append(Respuestas.textoJson(modelo.tipo()))
+                    .append(",\"baja\":").append(modelo.baja()).append('}');
+        }
+        return json.append(']').toString();
+    }
+
+    private static void separar(StringBuilder json) {
+        if (json.length() > 1) {
+            json.append(',');
+        }
     }
 
     private static boolean soloMetodo(HttpExchange intercambio, String metodo) throws IOException {

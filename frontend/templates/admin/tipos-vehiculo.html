@@ -24,9 +24,26 @@
     </nav>
     <h1 class="h4 titulo-seccion mb-4">Tipos de vehículo</h1>
 
+    <div id="tipos-error" class="alert alert-danger d-none" role="alert"></div>
+
     <div class="card">
       <div class="card-body p-4">
-        <p class="mb-0">Próximamente: listado y formulario de tipos de vehículo.</p>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Tipo de vehículo</th>
+                <th scope="col">Origen en vPIC</th>
+                <th scope="col" class="text-end">Marcas</th>
+                <th scope="col" class="text-end">Modelos</th>
+                <th scope="col"><span class="visually-hidden">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="tipos-filas">
+              <tr><td colspan="5" class="text-muted">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
@@ -34,5 +51,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/menu-admin.js"></script>
+  <script src="/js/tipos-vehiculo-admin.js"></script>
 </body>
 </html>
