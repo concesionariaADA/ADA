@@ -62,3 +62,32 @@ Acceso a la base:
 - Otro cliente (DBeaver, IntelliJ): host `localhost`, puerto `POSTGRES_PORT` del `.env`.
 
 Comandos útiles: `docker compose stop` (detiene sin borrar datos) y `docker compose down -v` (borra los contenedores **y los datos**).
+
+La base se crea sola con `db/init/01_esquema_inicial.sql` cuando el volumen está vacío. Para comprobar las reglas de la base: `docker exec -i ada-postgres sh -c 'psql -X -q -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < db/pruebas/verificar_esquema.sql` (debe terminar con `ALL SCHEMA CHECKS PASSED`).
+
+## Ejecutar la aplicación
+
+El backend es Java puro: el servidor HTTP del JDK entrega las páginas de `frontend/` y la API desde el mismo proceso.
+
+1. Agregar al `.env` el puerto del servidor: `SERVIDOR_PUERTO=8080` (si falta, usa `8080`).
+2. Compilar y copiar las dependencias: `mvn -q compile dependency:copy-dependencies -DincludeScope=runtime`.
+3. Arrancar el servidor (Windows; en Linux o macOS cambiar `;` por `:`):
+   ```
+   java -cp "target/classes;target/dependency/*" com.ada.Main
+   ```
+   También se puede ejecutar `com.ada.Main` desde el IDE.
+4. Abrir http://localhost:8080/ (sitio público) y http://localhost:8080/admin (Backoffice). El servidor solo acepta conexiones desde la propia PC.
+
+### Primer administrador
+
+Solo un empleado con función Administrativa entra al `/admin` (RN19). Para crear el primero, desde una terminal (no desde el IDE, porque pide la contraseña sin mostrarla):
+
+```
+java -cp "target/classes;target/dependency/*" com.ada.empleados.CrearAdministrador <legajo> <nombre> <apellido> <usuario>
+```
+
+Pide la contraseña dos veces (mínimo 8 caracteres) y la guarda cifrada. La sesión del `/admin` vence tras 30 minutos sin actividad.
+
+### Pruebas
+
+`mvn test` corre las pruebas de Java. Una de ellas consulta la base de Docker y se omite si la base no está levantada.
