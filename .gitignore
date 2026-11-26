@@ -2,9 +2,11 @@ target/
 out/
 *.class
 *.jar
+!.mvn/wrapper/maven-wrapper.jar
 .idea/
 *.iml
 .vscode/
+.env
 
 # Local environment settings (copy from .env.example)
 .env
