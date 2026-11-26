@@ -4,6 +4,7 @@
 
 ## Sources scanned
 
+- .claude\skills
 - C:\Users\Usuario\.claude\skills
 
 ## Contract
@@ -16,6 +17,7 @@
 
 | Skill | Trigger / description | Scope | Path |
 | --- | --- | --- | --- |
+| `issue` | Start work on a GitHub Issue of concesionariaADA/ADA — load its scope plus the cited business rules (RN) and decisions (D) from Issue #1, check blockers, and create the issue branch. Use as /issue <N>. | project | `C:\workSpace\ADA\.claude\skills\issue\SKILL.md` |
 | `n8n-code-javascript` | Write JavaScript code in n8n Code nodes. Use when writing JavaScript in n8n, using $input/$json/$node syntax, making HTTP requests with $helpers, working with dates using DateTime, troubleshooting Code node errors, choosing between Code node modes, or doing any custom data transformation in n8n. Always use this skill when a workflow needs a Code node — whether for data aggregation, filtering, API calls, format conversion, batch processing logic, or any custom JavaScript. Covers SplitInBatches loop patterns, cross-iteration data, pairedItem, and real-world production patterns. | user | `C:\Users\Usuario\.claude\skills\n8n-code-javascript\SKILL.md` |
 | `n8n-code-python` | Write Python code in n8n Code nodes. Use when writing Python in n8n, using _input/_json/_node syntax, working with standard library, or need to understand Python limitations in n8n Code nodes. Use this skill when the user specifically requests Python for an n8n Code node. Note — JavaScript is recommended for 95% of use cases — only use Python when the user explicitly prefers it or the task requires Python-specific standard library capabilities (regex, hashlib, statistics). | user | `C:\Users\Usuario\.claude\skills\n8n-code-python\SKILL.md` |
 | `n8n-expression-syntax` | Validate n8n expression syntax and fix common errors. Use when writing n8n expressions, using {{}} syntax, accessing $json/$node variables, troubleshooting expression errors, mapping data between nodes, or referencing webhook data in workflows. Use this skill whenever configuring node fields that reference data from previous nodes — expressions are how n8n passes data between nodes, and getting the syntax wrong is the most common source of workflow errors. | user | `C:\Users\Usuario\.claude\skills\n8n-expression-syntax\SKILL.md` |
