@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ADA is a car dealership system (TPI Programación II): vehicle stock (automóviles, camionetas, motocicletas), sales tickets (boletos), employees, clients, a public frontoffice catalog, and an authenticated `/admin`.
 
-- Java 17, Maven (`pom.xml` has `maven.compiler.release` 17 and no dependencies yet).
-- The framework and the database are **not decided yet**. Don't add frameworks, dependencies, or database-specific code unless the user picks them. Ask first.
+- Java 17, Maven (`pom.xml` has `maven.compiler.release` 17).
+- Database: PostgreSQL 17 in Docker (`docker-compose.yml`, with pgAdmin). Settings live in a local `.env` copied from `.env.example` and are read through `dotenv-java` (`com.ada.persistencia.ConexionBaseDatos`). Approved dependencies: PostgreSQL JDBC driver and `dotenv-java`.
+- Stack (Issue #1, D03a/D03b/D04): plain classic Java with no frameworks (no Spring). The backend uses the JDK `HttpServer` and plain JDBC. The frontend in `frontend/` is HTML + Bootstrap 5 + vanilla JS (no React or Node), styled after meucci.com.ar (#14, #25). A library is allowed only if it stays isolated in one clearly identified place; ask before adding any dependency.
 
 ## Business rules: source of truth
 

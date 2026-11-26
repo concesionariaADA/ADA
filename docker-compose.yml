@@ -1,0 +1,40 @@
+# Local development database. Values come from .env (copy it from .env.example).
+services:
+  postgres:
+    # Debian bookworm keeps legacy time-zone names (e.g. America/Buenos_Aires) that the
+    # JDBC driver sends from the JVM; the default trixie image rejects them.
+    image: postgres:17-bookworm
+    container_name: ada-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Missing POSTGRES_DB - copy .env.example to .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Missing POSTGRES_USER - copy .env.example to .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Missing POSTGRES_PASSWORD - copy .env.example to .env}
+    ports:
+      - "${POSTGRES_PORT:?Missing POSTGRES_PORT - copy .env.example to .env}:5432"
+    volumes:
+      - ada-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: ada-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:?Missing PGADMIN_DEFAULT_EMAIL - copy .env.example to .env}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?Missing PGADMIN_DEFAULT_PASSWORD - copy .env.example to .env}
+    ports:
+      - "${PGADMIN_PORT:?Missing PGADMIN_PORT - copy .env.example to .env}:80"
+    volumes:
+      - ada-pgadmin:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  ada-pgdata:
+  ada-pgadmin:

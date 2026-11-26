@@ -44,3 +44,21 @@ Resumen de los `[PENDIENTE DEFINICIÓN]` de la tabla. Son preguntas para el equi
 7. **Estados/enums:** RN02 (Nueva/Usada, Fuera de exhibición), RN06 (En negociación, Confirmado, Cancelado), RN17 (NUEVO/USADO) y RN18 (DISPONIBLE, RESERVADA, VENDIDA, FUERA_DE_EXHIBICION) usan nombres distintos.
 8. **Relación venta/boleto:** RN05 y RN06 hablan de "venta"; RN09, RN13, RN19, RN20 y RN21 hablan de "boleto".
 9. **Roles:** RN04 (funciones Venta/Administrativa) y RN19 (roles Administrador/Empleado).
+
+## Entorno de desarrollo
+
+Requisitos: JDK 17 o superior, Maven y Docker Desktop.
+
+La base de datos es PostgreSQL 17 y corre en Docker; no hace falta tener PostgreSQL instalado.
+
+1. Copiar la configuración local: `cp .env.example .env`. El `.env` no se commitea; si el puerto `5433` está ocupado, cambiar `POSTGRES_PORT` solo en tu `.env`.
+2. Levantar la base y pgAdmin: `docker compose up -d`.
+3. Compilar: `mvn compile`. La aplicación se conecta con `com.ada.persistencia.ConexionBaseDatos`, que lee los datos de conexión del `.env`.
+
+Acceso a la base:
+
+- Consola: `docker exec -it ada-postgres psql -U ada -d ada` (si cambiaste `POSTGRES_USER` o `POSTGRES_DB` en tu `.env`, usá esos valores).
+- pgAdmin: http://localhost:5050, con el usuario y la contraseña `PGADMIN_*` del `.env`. Para registrar el servidor usar host `postgres`, puerto `5432` y los datos `POSTGRES_*` del `.env`.
+- Otro cliente (DBeaver, IntelliJ): host `localhost`, puerto `POSTGRES_PORT` del `.env`.
+
+Comandos útiles: `docker compose stop` (detiene sin borrar datos) y `docker compose down -v` (borra los contenedores **y los datos**).
