@@ -6,6 +6,9 @@ out/
 *.iml
 .vscode/
 
+# Local environment settings (copy from .env.example)
+.env
+
 # Local agent state
 .claude/settings.local.json
 .engram/
