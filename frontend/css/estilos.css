@@ -1,0 +1,339 @@
+/*
+ * ADA Concesionaria - shared styles.
+ * Visual identity (Issue #24): Montserrat, black primary, red secondary,
+ * blue accent, white background. Inspired by meucci.com.ar, not a copy.
+ */
+
+:root {
+  --ada-negro: #000;
+  --ada-rojo: #e30513;
+  --ada-rojo-oscuro: #b8040f;
+  --ada-azul: #0075bf;
+  --ada-azul-oscuro: #005a93;
+  --ada-blanco: #fff;
+  --ada-gris-claro: #f5f5f5;
+
+  /* Bootstrap 5.3 variable overrides */
+  --bs-body-font-family: "Montserrat", sans-serif;
+  --bs-body-bg: var(--ada-blanco);
+  --bs-body-color: var(--ada-negro);
+  --bs-link-color: var(--ada-azul);
+  --bs-link-color-rgb: 0, 117, 191;
+  --bs-link-hover-color: var(--ada-azul-oscuro);
+  --bs-link-hover-color-rgb: 0, 90, 147;
+  --bs-primary: var(--ada-negro);
+  --bs-primary-rgb: 0, 0, 0;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "Montserrat", sans-serif;
+}
+
+body {
+  background-color: var(--ada-blanco);
+  color: var(--ada-negro);
+}
+
+/* Links */
+a {
+  color: var(--ada-azul);
+}
+
+a:hover,
+a:focus {
+  color: var(--ada-azul-oscuro);
+}
+
+/* Navbar */
+.navbar-ada {
+  background-color: var(--ada-negro);
+  border-bottom: 3px solid var(--ada-rojo);
+}
+
+.navbar-ada .navbar-brand {
+  color: var(--ada-blanco);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.navbar-ada .navbar-brand span {
+  color: var(--ada-rojo);
+}
+
+.navbar-ada .nav-link {
+  color: var(--ada-blanco);
+  font-weight: 500;
+}
+
+.navbar-ada .nav-link:hover,
+.navbar-ada .nav-link:focus {
+  color: var(--ada-rojo);
+}
+
+/* Buttons */
+.btn {
+  border-radius: 0;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--ada-negro);
+  --bs-btn-border-color: var(--ada-negro);
+  --bs-btn-hover-bg: var(--ada-rojo);
+  --bs-btn-hover-border-color: var(--ada-rojo);
+  --bs-btn-active-bg: var(--ada-rojo-oscuro);
+  --bs-btn-active-border-color: var(--ada-rojo-oscuro);
+  --bs-btn-disabled-bg: var(--ada-negro);
+  --bs-btn-disabled-border-color: var(--ada-negro);
+}
+
+.btn-ada-rojo {
+  --bs-btn-color: var(--ada-blanco);
+  --bs-btn-bg: var(--ada-rojo);
+  --bs-btn-border-color: var(--ada-rojo);
+  --bs-btn-hover-color: var(--ada-blanco);
+  --bs-btn-hover-bg: var(--ada-rojo-oscuro);
+  --bs-btn-hover-border-color: var(--ada-rojo-oscuro);
+  --bs-btn-active-color: var(--ada-blanco);
+  --bs-btn-active-bg: var(--ada-rojo-oscuro);
+  --bs-btn-active-border-color: var(--ada-rojo-oscuro);
+}
+
+.btn-ada-azul {
+  --bs-btn-color: var(--ada-blanco);
+  --bs-btn-bg: var(--ada-azul);
+  --bs-btn-border-color: var(--ada-azul);
+  --bs-btn-hover-color: var(--ada-blanco);
+  --bs-btn-hover-bg: var(--ada-azul-oscuro);
+  --bs-btn-hover-border-color: var(--ada-azul-oscuro);
+  --bs-btn-active-color: var(--ada-blanco);
+  --bs-btn-active-bg: var(--ada-azul-oscuro);
+  --bs-btn-active-border-color: var(--ada-azul-oscuro);
+}
+
+.btn-outline-light:hover {
+  color: var(--ada-negro);
+}
+
+/* Forms */
+.form-control {
+  border-radius: 0;
+}
+
+.form-control:focus {
+  border-color: var(--ada-azul);
+  box-shadow: 0 0 0 0.2rem rgba(0, 117, 191, 0.25);
+}
+
+/* Cards */
+.card {
+  border-radius: 0;
+}
+
+/* Public home hero */
+.hero-ada {
+  background-color: var(--ada-negro);
+  color: var(--ada-blanco);
+  padding: 5rem 0;
+}
+
+.hero-ada h1 {
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hero-ada .acento {
+  color: var(--ada-rojo);
+}
+
+/* Admin login */
+.login-ada {
+  min-height: calc(100vh - 60px);
+  background-color: var(--ada-gris-claro);
+}
+
+.login-ada .card {
+  border-top: 4px solid var(--ada-rojo);
+  max-width: 400px;
+  width: 100%;
+}
+
+.titulo-seccion {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+footer.footer-ada {
+  background-color: var(--ada-negro);
+  color: var(--ada-blanco);
+  font-size: 0.875rem;
+}
+
+/*
+ * Admin layout (rendered by /js/menu-admin.js): fixed top bar, black left
+ * sidebar with red active item. From lg (992px) up the sidebar is fixed and
+ * body.menu-colapsado hides it; below lg it is a Bootstrap offcanvas overlay.
+ */
+.admin-ada {
+  --alto-barra-admin: 60px;
+  --ancho-menu-admin: 250px;
+  padding-top: var(--alto-barra-admin);
+  background-color: var(--ada-gris-claro);
+  min-height: 100vh;
+}
+
+.barra-admin {
+  height: var(--alto-barra-admin);
+}
+
+.barra-admin .boton-hamburguesa {
+  border-color: rgba(255, 255, 255, 0.4);
+  border-radius: 0;
+  padding: 0.25rem 0.5rem;
+}
+
+.barra-admin .boton-hamburguesa:focus {
+  box-shadow: 0 0 0 0.2rem rgba(227, 5, 19, 0.5);
+}
+
+.barra-admin .usuario-admin {
+  color: var(--ada-blanco);
+  font-size: 0.875rem;
+  font-weight: 500;
+  max-width: 40vw;
+}
+
+.sidebar-ada.offcanvas-lg {
+  --bs-offcanvas-width: var(--ancho-menu-admin);
+  --bs-offcanvas-bg: var(--ada-negro);
+  --bs-offcanvas-color: var(--ada-blanco);
+  background-color: var(--ada-negro) !important;
+  color: var(--ada-blanco);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-ada .offcanvas-header {
+  border-bottom: 3px solid var(--ada-rojo);
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.sidebar-ada-cuerpo {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem 0;
+}
+
+.sidebar-ada-titulo {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1rem 1.25rem 0.25rem;
+}
+
+.sidebar-ada .nav-link {
+  color: var(--ada-blanco);
+  border-left: 4px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.45rem 1.25rem 0.45rem calc(1.25rem - 4px);
+}
+
+.sidebar-ada .nav-link:hover,
+.sidebar-ada .nav-link:focus {
+  color: var(--ada-rojo);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-ada .nav-link.active {
+  color: var(--ada-blanco);
+  background-color: var(--ada-rojo);
+  border-left-color: var(--ada-rojo-oscuro);
+  font-weight: 700;
+}
+
+.sidebar-ada-pie {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 1rem 1.25rem;
+}
+
+.contenido-admin {
+  padding: 1.5rem;
+}
+
+@media (min-width: 992px) {
+  .sidebar-ada.offcanvas-lg {
+    position: fixed;
+    top: var(--alto-barra-admin);
+    bottom: 0;
+    left: 0;
+    width: var(--ancho-menu-admin);
+    z-index: 1020;
+  }
+
+  .contenido-admin {
+    margin-left: var(--ancho-menu-admin);
+    padding: 2rem;
+  }
+
+  .menu-listo .sidebar-ada.offcanvas-lg {
+    transition: transform 0.25s ease;
+  }
+
+  .menu-listo .contenido-admin {
+    transition: margin-left 0.25s ease;
+  }
+
+  .menu-colapsado .sidebar-ada.offcanvas-lg {
+    transform: translateX(-100%);
+  }
+
+  .menu-colapsado .contenido-admin {
+    margin-left: 0;
+  }
+}
+
+/* Admin breadcrumb */
+.contenido-admin .breadcrumb {
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Dashboard cards */
+.tarjeta-dashboard {
+  border: 0;
+  border-top: 4px solid var(--ada-rojo);
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.tarjeta-dashboard-titulo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.tarjeta-dashboard-valor {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 0;
+}
+
+.tarjeta-dashboard-enlace {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
