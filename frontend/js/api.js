@@ -72,11 +72,18 @@
     return obtenerJsonAdmin("/api/admin/dashboard");
   }
 
+  // GET /api/admin/marcas -> [{"id": n, "makeIdVpic": n|null, "nombre": "...",
+  // "tipos": ["AUTOMOVIL", ...], "habilitada": bool, "baja": bool}], ordered by name.
+  function marcas() {
+    return obtenerJsonAdmin("/api/admin/marcas");
+  }
+
   window.Api = Object.freeze({
     salud: salud,
     iniciarSesion: iniciarSesion,
     cerrarSesion: cerrarSesion,
     sesion: sesion,
-    dashboard: dashboard
+    dashboard: dashboard,
+    marcas: marcas
   });
 })();

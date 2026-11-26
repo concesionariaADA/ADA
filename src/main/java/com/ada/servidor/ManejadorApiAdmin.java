@@ -1,6 +1,8 @@
 package com.ada.servidor;
 
 import com.ada.autenticacion.ServicioAutenticacion;
+import com.ada.catalogo.Marca;
+import com.ada.catalogo.RepositorioMarcas;
 import com.ada.panel.RepositorioPanel;
 import com.ada.panel.ResumenPanel;
 import com.sun.net.httpserver.HttpExchange;
@@ -13,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +31,9 @@ import java.util.Optional;
  *   <li>{@code GET /api/admin/dashboard} — dashboard counts as JSON (only when a
  *       {@link RepositorioPanel} is given); 500 {@code {"ok":false}} on a database error.
  *       The session filter guards it like every other {@code /api/admin} path.</li>
+ *   <li>{@code GET /api/admin/marcas} — brands of the local catalog with their vehicle types,
+ *       as a JSON array ordered by name (only when a {@link RepositorioMarcas} is given);
+ *       500 {@code {"ok":false}} on a database error.</li>
  * </ul>
  * Any other path answers 404 JSON. Without a {@link ServicioAutenticacion} every path
  * answers 404. Passwords are never logged.
@@ -38,6 +44,7 @@ final class ManejadorApiAdmin implements HttpHandler {
     static final String RUTA_LOGOUT = "/api/admin/logout";
     static final String RUTA_SESION = "/api/admin/sesion";
     static final String RUTA_DASHBOARD = "/api/admin/dashboard";
+    static final String RUTA_MARCAS = "/api/admin/marcas";
 
     /** Largest login body accepted, in bytes. */
     static final int CUERPO_MAXIMO = 4096;
@@ -48,6 +55,7 @@ final class ManejadorApiAdmin implements HttpHandler {
 
     private final ServicioAutenticacion autenticacion;
     private final RepositorioPanel repositorioPanel;
+    private final RepositorioMarcas repositorioMarcas;
 
     /** @param autenticacion login service, or null for no endpoints (all 404) */
     ManejadorApiAdmin(ServicioAutenticacion autenticacion) {
@@ -59,8 +67,19 @@ final class ManejadorApiAdmin implements HttpHandler {
      * @param repositorioPanel dashboard counts, or null for no dashboard endpoint (404)
      */
     ManejadorApiAdmin(ServicioAutenticacion autenticacion, RepositorioPanel repositorioPanel) {
+        this(autenticacion, repositorioPanel, null);
+    }
+
+    /**
+     * @param autenticacion     login service, or null for no endpoints (all 404)
+     * @param repositorioPanel  dashboard counts, or null for no dashboard endpoint (404)
+     * @param repositorioMarcas brand list, or null for no brands endpoint (404)
+     */
+    ManejadorApiAdmin(ServicioAutenticacion autenticacion, RepositorioPanel repositorioPanel,
+                      RepositorioMarcas repositorioMarcas) {
         this.autenticacion = autenticacion;
         this.repositorioPanel = repositorioPanel;
+        this.repositorioMarcas = repositorioMarcas;
     }
 
     @Override
@@ -78,6 +97,8 @@ final class ManejadorApiAdmin implements HttpHandler {
                 consultarSesion(intercambio);
             } else if (RUTA_DASHBOARD.equals(ruta) && repositorioPanel != null) {
                 consultarDashboard(intercambio);
+            } else if (RUTA_MARCAS.equals(ruta) && repositorioMarcas != null) {
+                consultarMarcas(intercambio);
             } else {
                 noEncontrado(intercambio);
             }
@@ -177,6 +198,40 @@ final class ManejadorApiAdmin implements HttpHandler {
                 + ",\"ventasConfirmadas\":" + resumen.ventasConfirmadas()
                 + ",\"clientes\":" + resumen.clientes()
                 + ",\"empleados\":" + resumen.empleados() + "}");
+    }
+
+    private void consultarMarcas(HttpExchange intercambio) throws IOException {
+        if (!soloMetodo(intercambio, "GET")) {
+            return;
+        }
+        List<Marca> marcas;
+        try {
+            marcas = repositorioMarcas.listar();
+        } catch (SQLException e) {
+            System.err.println("Admin brands: database error (SQLState " + e.getSQLState() + ")");
+            Respuestas.enviarJson(intercambio, 500, RECHAZO);
+            return;
+        } catch (IllegalStateException e) {
+            System.err.println("Admin brands: " + e.getMessage());
+            Respuestas.enviarJson(intercambio, 500, RECHAZO);
+            return;
+        }
+        StringBuilder json = new StringBuilder("[");
+        for (Marca marca : marcas) {
+            if (json.length() > 1) {
+                json.append(',');
+            }
+            json.append("{\"id\":").append(marca.id())
+                    .append(",\"makeIdVpic\":").append(marca.makeIdVpic())
+                    .append(",\"nombre\":").append(Respuestas.textoJson(marca.nombre()))
+                    .append(",\"tipos\":[");
+            for (int i = 0; i < marca.tipos().size(); i++) {
+                json.append(i == 0 ? "" : ",").append(Respuestas.textoJson(marca.tipos().get(i)));
+            }
+            json.append("],\"habilitada\":").append(marca.habilitada())
+                    .append(",\"baja\":").append(marca.baja()).append('}');
+        }
+        Respuestas.enviarJson(intercambio, 200, json.append(']').toString());
     }
 
     private static boolean soloMetodo(HttpExchange intercambio, String metodo) throws IOException {

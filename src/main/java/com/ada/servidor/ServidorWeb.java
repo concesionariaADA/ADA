@@ -1,6 +1,7 @@
 package com.ada.servidor;
 
 import com.ada.autenticacion.ServicioAutenticacion;
+import com.ada.catalogo.RepositorioMarcas;
 import com.ada.panel.RepositorioPanel;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpContext;
@@ -34,7 +35,8 @@ import java.util.concurrent.Executors;
  * {@link FiltroSesion} in there; this class implements no authentication itself. When a
  * {@link ServicioAutenticacion} is given, {@code /api/admin} serves the login, logout and
  * session endpoints, and the server refuses to start without at least one admin filter.
- * When a {@link RepositorioPanel} is given too, {@code /api/admin} also serves the dashboard.
+ * When a {@link RepositorioPanel} is given too, {@code /api/admin} also serves the dashboard,
+ * and with a {@link RepositorioMarcas} it serves the brand list.
  */
 public final class ServidorWeb {
 
@@ -54,6 +56,7 @@ public final class ServidorWeb {
     private final Path directorioFrontend;
     private final ServicioAutenticacion autenticacion;
     private final RepositorioPanel repositorioPanel;
+    private final RepositorioMarcas repositorioMarcas;
     private final List<Filter> filtrosAdmin = new ArrayList<>();
     private HttpServer servidor;
     private ExecutorService ejecutor;
@@ -97,10 +100,26 @@ public final class ServidorWeb {
      */
     public ServidorWeb(int puerto, Path directorioFrontend, ServicioAutenticacion autenticacion,
                        RepositorioPanel repositorioPanel) {
+        this(puerto, directorioFrontend, autenticacion, repositorioPanel, null);
+    }
+
+    /**
+     * Server with the admin login endpoints, the dashboard and the brand list
+     * ({@code GET /api/admin/marcas}), all protected by the admin filters.
+     *
+     * @param puerto             port to listen on; {@code 0} picks a free port
+     * @param directorioFrontend base directory of the frontend files
+     * @param autenticacion      admin login service, or null for no login endpoints
+     * @param repositorioPanel   dashboard counts, or null for no dashboard endpoint (404)
+     * @param repositorioMarcas  brand list, or null for no brands endpoint (404)
+     */
+    public ServidorWeb(int puerto, Path directorioFrontend, ServicioAutenticacion autenticacion,
+                       RepositorioPanel repositorioPanel, RepositorioMarcas repositorioMarcas) {
         this.puerto = puerto;
         this.directorioFrontend = directorioFrontend.toAbsolutePath().normalize();
         this.autenticacion = autenticacion;
         this.repositorioPanel = repositorioPanel;
+        this.repositorioMarcas = repositorioMarcas;
     }
 
     /**
@@ -163,7 +182,7 @@ public final class ServidorWeb {
     private List<HttpContext> registrarContextosAdmin(HttpServer destino) {
         List<HttpContext> contextos = List.of(
                 destino.createContext(RUTA_ADMIN, new ManejadorAdmin(directorioFrontend)),
-                destino.createContext(RUTA_API_ADMIN, new ManejadorApiAdmin(autenticacion, repositorioPanel)));
+                destino.createContext(RUTA_API_ADMIN, new ManejadorApiAdmin(autenticacion, repositorioPanel, repositorioMarcas)));
         for (HttpContext contexto : contextos) {
             contexto.getFilters().addAll(filtrosAdmin);
         }

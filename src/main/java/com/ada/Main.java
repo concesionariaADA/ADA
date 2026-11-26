@@ -2,6 +2,7 @@ package com.ada;
 
 import com.ada.autenticacion.AlmacenSesiones;
 import com.ada.autenticacion.ServicioAutenticacion;
+import com.ada.catalogo.RepositorioMarcasJdbc;
 import com.ada.empleados.RepositorioCredencialesJdbc;
 import com.ada.panel.RepositorioPanelJdbc;
 import com.ada.servidor.FiltroSesion;
@@ -21,7 +22,7 @@ public final class Main {
                 new RepositorioCredencialesJdbc(), new AlmacenSesiones(Clock.systemUTC()));
         ServidorWeb servidor = new ServidorWeb(
                 ServidorWeb.leerPuertoDelEntorno(), ServidorWeb.FRONTEND_POR_DEFECTO, autenticacion,
-                new RepositorioPanelJdbc());
+                new RepositorioPanelJdbc(), new RepositorioMarcasJdbc());
         servidor.agregarFiltroAdmin(new FiltroSesion(autenticacion));
         servidor.iniciar();
         Runtime.getRuntime().addShutdownHook(new Thread(servidor::detener));
