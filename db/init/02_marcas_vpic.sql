@@ -14,6 +14,9 @@
 -- ON CONFLICT keeps rows that already exist untouched, so running this again does not
 -- duplicate brands nor change what the administrator set (Issue #7 acceptance criteria).
 
+-- D01 was resolved after 01_esquema_inicial.sql: CAMIONETA brands come from vPIC "truck".
+UPDATE tipo_vehiculo SET tipo_vpic = 'truck' WHERE id = 2 AND tipo_vpic IS NULL;
+
 INSERT INTO marca (make_id_vpic, nombre) VALUES
     (440, 'ASTON MARTIN'),
     (441, 'TESLA'),
