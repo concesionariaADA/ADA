@@ -19,4 +19,9 @@ ADA is a car dealership system (TPI Programación II): vehicle stock (automóvil
 ## Conventions
 
 - Identifiers (classes, methods, variables) are in **Spanish**, following the RN domain language, e.g. `Vehiculo`, `Unidad`, `Boleto`, `registrarVenta()`.
-- Git: one branch per Issue (`issue-<N>-<slug>`) from `main`, then a PR into `main`. Use Conventional Commits and reference the Issue (`#N`).
+- Git branches:
+  - `main`: stable branch. It only receives merges from `dev`.
+  - `dev`: integration (pre-load) branch where the team's work is combined and tested before it reaches `main`.
+  - Working branches are named `<name>/<topic>` (for example `javier/registros-bd`), created from an up-to-date `dev`, with a PR into `dev`. Names by GitHub login: `javier` (javierduartepy), `juli` (JuliAqno), `amaro` (amaroisi).
+  - Flow: `<name>/<topic>` → PR into `dev` → `dev` merged into `main` once verified.
+- Use Conventional Commits and reference the Issue (`#N`).
