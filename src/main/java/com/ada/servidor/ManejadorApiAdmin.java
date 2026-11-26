@@ -1,6 +1,8 @@
 package com.ada.servidor;
 
 import com.ada.autenticacion.ServicioAutenticacion;
+import com.ada.panel.RepositorioPanel;
+import com.ada.panel.ResumenPanel;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -23,6 +25,9 @@ import java.util.Optional;
  *       for a wrong user or password alike.</li>
  *   <li>{@code POST /api/admin/logout} — closes the session (if any) and deletes the cookie.</li>
  *   <li>{@code GET /api/admin/sesion} — {@code {"usuario":"..."}} of the current session, or 401.</li>
+ *   <li>{@code GET /api/admin/dashboard} — dashboard counts as JSON (only when a
+ *       {@link RepositorioPanel} is given); 500 {@code {"ok":false}} on a database error.
+ *       The session filter guards it like every other {@code /api/admin} path.</li>
  * </ul>
  * Any other path answers 404 JSON. Without a {@link ServicioAutenticacion} every path
  * answers 404. Passwords are never logged.
@@ -32,6 +37,7 @@ final class ManejadorApiAdmin implements HttpHandler {
     static final String RUTA_LOGIN = "/api/admin/login";
     static final String RUTA_LOGOUT = "/api/admin/logout";
     static final String RUTA_SESION = "/api/admin/sesion";
+    static final String RUTA_DASHBOARD = "/api/admin/dashboard";
 
     /** Largest login body accepted, in bytes. */
     static final int CUERPO_MAXIMO = 4096;
@@ -41,10 +47,20 @@ final class ManejadorApiAdmin implements HttpHandler {
     private static final String RECHAZO = "{\"ok\":false}";
 
     private final ServicioAutenticacion autenticacion;
+    private final RepositorioPanel repositorioPanel;
 
     /** @param autenticacion login service, or null for no endpoints (all 404) */
     ManejadorApiAdmin(ServicioAutenticacion autenticacion) {
+        this(autenticacion, null);
+    }
+
+    /**
+     * @param autenticacion    login service, or null for no endpoints (all 404)
+     * @param repositorioPanel dashboard counts, or null for no dashboard endpoint (404)
+     */
+    ManejadorApiAdmin(ServicioAutenticacion autenticacion, RepositorioPanel repositorioPanel) {
         this.autenticacion = autenticacion;
+        this.repositorioPanel = repositorioPanel;
     }
 
     @Override
@@ -60,6 +76,8 @@ final class ManejadorApiAdmin implements HttpHandler {
                 cerrarSesion(intercambio);
             } else if (RUTA_SESION.equals(ruta)) {
                 consultarSesion(intercambio);
+            } else if (RUTA_DASHBOARD.equals(ruta) && repositorioPanel != null) {
+                consultarDashboard(intercambio);
             } else {
                 noEncontrado(intercambio);
             }
@@ -135,6 +153,30 @@ final class ManejadorApiAdmin implements HttpHandler {
             return;
         }
         Respuestas.enviarJson(intercambio, 200, "{\"usuario\":" + Respuestas.textoJson(usuario.get()) + "}");
+    }
+
+    private void consultarDashboard(HttpExchange intercambio) throws IOException {
+        if (!soloMetodo(intercambio, "GET")) {
+            return;
+        }
+        ResumenPanel resumen;
+        try {
+            resumen = repositorioPanel.obtenerResumen();
+        } catch (SQLException e) {
+            System.err.println("Admin dashboard: database error (SQLState " + e.getSQLState() + ")");
+            Respuestas.enviarJson(intercambio, 500, RECHAZO);
+            return;
+        } catch (IllegalStateException e) {
+            System.err.println("Admin dashboard: " + e.getMessage());
+            Respuestas.enviarJson(intercambio, 500, RECHAZO);
+            return;
+        }
+        Respuestas.enviarJson(intercambio, 200, "{\"unidadesDisponibles\":" + resumen.unidadesDisponibles()
+                + ",\"unidadesReservadas\":" + resumen.unidadesReservadas()
+                + ",\"unidadesVendidas\":" + resumen.unidadesVendidas()
+                + ",\"ventasConfirmadas\":" + resumen.ventasConfirmadas()
+                + ",\"clientes\":" + resumen.clientes()
+                + ",\"empleados\":" + resumen.empleados() + "}");
     }
 
     private static boolean soloMetodo(HttpExchange intercambio, String metodo) throws IOException {

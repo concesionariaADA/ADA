@@ -1,6 +1,7 @@
 package com.ada.servidor;
 
 import com.ada.autenticacion.ServicioAutenticacion;
+import com.ada.panel.RepositorioPanel;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
@@ -33,6 +34,7 @@ import java.util.concurrent.Executors;
  * {@link FiltroSesion} in there; this class implements no authentication itself. When a
  * {@link ServicioAutenticacion} is given, {@code /api/admin} serves the login, logout and
  * session endpoints, and the server refuses to start without at least one admin filter.
+ * When a {@link RepositorioPanel} is given too, {@code /api/admin} also serves the dashboard.
  */
 public final class ServidorWeb {
 
@@ -51,6 +53,7 @@ public final class ServidorWeb {
     private final int puerto;
     private final Path directorioFrontend;
     private final ServicioAutenticacion autenticacion;
+    private final RepositorioPanel repositorioPanel;
     private final List<Filter> filtrosAdmin = new ArrayList<>();
     private HttpServer servidor;
     private ExecutorService ejecutor;
@@ -79,9 +82,25 @@ public final class ServidorWeb {
      * @param autenticacion      admin login service, or null for no login endpoints
      */
     public ServidorWeb(int puerto, Path directorioFrontend, ServicioAutenticacion autenticacion) {
+        this(puerto, directorioFrontend, autenticacion, null);
+    }
+
+    /**
+     * Server with the admin login endpoints and the dashboard
+     * ({@code GET /api/admin/dashboard}), which the admin filters protect like any other
+     * {@code /api/admin} path.
+     *
+     * @param puerto             port to listen on; {@code 0} picks a free port
+     * @param directorioFrontend base directory of the frontend files
+     * @param autenticacion      admin login service, or null for no login endpoints
+     * @param repositorioPanel   dashboard counts, or null for no dashboard endpoint (404)
+     */
+    public ServidorWeb(int puerto, Path directorioFrontend, ServicioAutenticacion autenticacion,
+                       RepositorioPanel repositorioPanel) {
         this.puerto = puerto;
         this.directorioFrontend = directorioFrontend.toAbsolutePath().normalize();
         this.autenticacion = autenticacion;
+        this.repositorioPanel = repositorioPanel;
     }
 
     /**
@@ -144,7 +163,7 @@ public final class ServidorWeb {
     private List<HttpContext> registrarContextosAdmin(HttpServer destino) {
         List<HttpContext> contextos = List.of(
                 destino.createContext(RUTA_ADMIN, new ManejadorAdmin(directorioFrontend)),
-                destino.createContext(RUTA_API_ADMIN, new ManejadorApiAdmin(autenticacion)));
+                destino.createContext(RUTA_API_ADMIN, new ManejadorApiAdmin(autenticacion, repositorioPanel)));
         for (HttpContext contexto : contextos) {
             contexto.getFilters().addAll(filtrosAdmin);
         }
