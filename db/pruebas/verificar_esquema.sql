@@ -43,6 +43,12 @@ SELECT pg_temp.comprobar('vehicle types are AUTOMOVIL, CAMIONETA, MOTOCICLETA wi
 -- ---------------------------------------------------------------------------
 -- Catalog: brands, brand types and models (RN03, RN23, RN29)
 -- ---------------------------------------------------------------------------
+-- The checks below insert their own brands (e.g. TOYOTA, MakeId 448), which also come in
+-- db/init/02_marcas_vpic.sql. Empty the catalog first; the final ROLLBACK restores it.
+TRUNCATE marca RESTART IDENTITY CASCADE;
+SELECT pg_temp.comprobar('catalog is empty before the checks',
+    NOT EXISTS (SELECT 1 FROM marca));
+
 INSERT INTO marca (make_id_vpic, nombre) VALUES (448, 'TOYOTA'), (474, 'HONDA');
 INSERT INTO marca_tipo_vehiculo (marca_id, tipo_vehiculo_id) VALUES
     ((SELECT id FROM marca WHERE nombre = 'TOYOTA'), 1),
