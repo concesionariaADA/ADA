@@ -1,5 +1,6 @@
 package com.ada.servidor;
 
+import com.ada.autenticacion.ServicioAutenticacion;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
@@ -28,8 +29,10 @@ import java.util.concurrent.Executors;
  *
  * <p><b>Extension point for authentication:</b> every {@link Filter} passed to
  * {@link #agregarFiltroAdmin(Filter)} before {@link #iniciar()} is attached to every
- * admin context (and to none of the public ones). The admin login task plugs its
- * session filter in there; this class implements no authentication itself.
+ * admin context (and to none of the public ones). The admin login plugs its
+ * {@link FiltroSesion} in there; this class implements no authentication itself. When a
+ * {@link ServicioAutenticacion} is given, {@code /api/admin} serves the login, logout and
+ * session endpoints, and the server refuses to start without at least one admin filter.
  */
 public final class ServidorWeb {
 
@@ -47,6 +50,7 @@ public final class ServidorWeb {
 
     private final int puerto;
     private final Path directorioFrontend;
+    private final ServicioAutenticacion autenticacion;
     private final List<Filter> filtrosAdmin = new ArrayList<>();
     private HttpServer servidor;
     private ExecutorService ejecutor;
@@ -57,12 +61,27 @@ public final class ServidorWeb {
     }
 
     /**
+     * Server without admin login: every {@code /api/admin} path answers 404.
+     *
      * @param puerto             port to listen on; {@code 0} picks a free port
      * @param directorioFrontend base directory of the frontend files
      */
     public ServidorWeb(int puerto, Path directorioFrontend) {
+        this(puerto, directorioFrontend, null);
+    }
+
+    /**
+     * Server with the admin login endpoints. Pair it with
+     * {@code agregarFiltroAdmin(new FiltroSesion(autenticacion))}.
+     *
+     * @param puerto             port to listen on; {@code 0} picks a free port
+     * @param directorioFrontend base directory of the frontend files
+     * @param autenticacion      admin login service, or null for no login endpoints
+     */
+    public ServidorWeb(int puerto, Path directorioFrontend, ServicioAutenticacion autenticacion) {
         this.puerto = puerto;
         this.directorioFrontend = directorioFrontend.toAbsolutePath().normalize();
+        this.autenticacion = autenticacion;
     }
 
     /**
@@ -82,6 +101,10 @@ public final class ServidorWeb {
     public synchronized void iniciar() throws IOException {
         if (servidor != null) {
             throw new IllegalStateException("The server is already running.");
+        }
+        if (autenticacion != null && filtrosAdmin.isEmpty()) {
+            // Fail closed: never expose the admin area with login enabled but no guard.
+            throw new IllegalStateException("Admin login is enabled but no admin filter was added.");
         }
         // Loopback only: the development server must not be reachable from the local network.
         HttpServer nuevo = HttpServer.create(
@@ -121,7 +144,7 @@ public final class ServidorWeb {
     private List<HttpContext> registrarContextosAdmin(HttpServer destino) {
         List<HttpContext> contextos = List.of(
                 destino.createContext(RUTA_ADMIN, new ManejadorAdmin(directorioFrontend)),
-                destino.createContext(RUTA_API_ADMIN, new ManejadorApiAdmin()));
+                destino.createContext(RUTA_API_ADMIN, new ManejadorApiAdmin(autenticacion)));
         for (HttpContext contexto : contextos) {
             contexto.getFilters().addAll(filtrosAdmin);
         }
