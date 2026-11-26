@@ -1,21 +1,39 @@
 /*
- * Backoffice home: wires the "Cerrar sesión" button to Api.cerrarSesion().
- * DOM wiring only; session handling lives in the Java backend.
+ * Backoffice home (Dashboard): fills the cards with Api.dashboard().
+ * DOM wiring only; the counts are computed by the Java backend.
+ * The menu and "Cerrar sesión" live in menu-admin.js.
  */
 (function () {
   "use strict";
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const boton = document.getElementById("boton-cerrar-sesion");
+  const SIN_DATO = "—";
 
-    boton.addEventListener("click", async function () {
-      boton.disabled = true;
-      try {
-        await window.Api.cerrarSesion();
-      } catch (error) {
-        // Redirect anyway: the login page is the safe place to land.
-      }
-      window.location.href = "/admin/login";
+  function formatear(valor) {
+    return typeof valor === "number" ? valor.toLocaleString("es-AR") : SIN_DATO;
+  }
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    const valores = document.querySelectorAll("[data-dato]");
+    const alerta = document.getElementById("dashboard-error");
+
+    valores.forEach(function (elemento) {
+      elemento.textContent = "…";
     });
+
+    try {
+      const datos = await window.Api.dashboard();
+      valores.forEach(function (elemento) {
+        elemento.textContent = formatear(datos[elemento.dataset.dato]);
+      });
+    } catch (error) {
+      if (error && error.sesionVencida) {
+        return; // Api is already redirecting to /admin/login.
+      }
+      valores.forEach(function (elemento) {
+        elemento.textContent = SIN_DATO;
+      });
+      alerta.textContent = "No se pudieron cargar los datos del panel.";
+      alerta.classList.remove("d-none");
+    }
   });
 })();

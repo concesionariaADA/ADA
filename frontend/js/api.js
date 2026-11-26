@@ -39,9 +39,44 @@
     return { ok: respuesta.ok, status: respuesta.status };
   }
 
+  // Shared GET for authenticated /api/admin/* endpoints -> parsed JSON body.
+  // A 401 means the admin session expired: redirect to the login page here,
+  // centrally, and throw an error flagged with sesionVencida so callers can
+  // skip their own error message while the browser navigates away.
+  async function obtenerJsonAdmin(ruta) {
+    const respuesta = await fetch(ruta, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "same-origin"
+    });
+    if (respuesta.status === 401) {
+      window.location.href = "/admin/login";
+      const error = new Error("HTTP 401");
+      error.sesionVencida = true;
+      throw error;
+    }
+    if (!respuesta.ok) {
+      throw new Error("HTTP " + respuesta.status);
+    }
+    return respuesta.json();
+  }
+
+  // GET /api/admin/sesion -> {"usuario": "..."} of the current session.
+  function sesion() {
+    return obtenerJsonAdmin("/api/admin/sesion");
+  }
+
+  // GET /api/admin/dashboard -> {"unidadesDisponibles": n, "unidadesReservadas": n,
+  // "unidadesVendidas": n, "ventasConfirmadas": n, "clientes": n, "empleados": n}.
+  function dashboard() {
+    return obtenerJsonAdmin("/api/admin/dashboard");
+  }
+
   window.Api = Object.freeze({
     salud: salud,
     iniciarSesion: iniciarSesion,
-    cerrarSesion: cerrarSesion
+    cerrarSesion: cerrarSesion,
+    sesion: sesion,
+    dashboard: dashboard
   });
 })();
