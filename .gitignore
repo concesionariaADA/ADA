@@ -6,6 +6,7 @@ out/
 .idea/
 *.iml
 .vscode/
+.env
 
 # Local agent state
 .claude/settings.local.json
