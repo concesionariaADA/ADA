@@ -97,6 +97,12 @@
     usuario.id = "usuario-admin";
 
     contenedor.append(hamburguesa, marca, usuario);
+    // Day/night toggle (Issue #33), provided by /js/tema-admin.js.
+    if (window.TemaAdmin) {
+      const tema = window.TemaAdmin.crearBoton();
+      tema.classList.add("ms-3", "flex-shrink-0");
+      contenedor.appendChild(tema);
+    }
     barra.appendChild(contenedor);
     return barra;
   }

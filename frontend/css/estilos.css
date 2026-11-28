@@ -25,6 +25,68 @@
   --bs-primary-rgb: 0, 0, 0;
 }
 
+/*
+ * Night mode (Issue #33). /js/tema-admin.js sets data-bs-theme="dark" on
+ * <html> (only on /admin pages); these values replace the light ones above.
+ * The top bar and sidebar are already black, so they stay as they are.
+ */
+[data-bs-theme="dark"] {
+  --ada-blanco-texto: #e9ecef;
+  --ada-fondo-noche: #121212;
+  --ada-azul-noche: #5fb4f0;
+  --ada-azul-noche-hover: #8ccaf5;
+
+  --bs-body-bg: #1e1e1e;
+  --bs-body-color: var(--ada-blanco-texto);
+  --bs-link-color: var(--ada-azul-noche);
+  --bs-link-color-rgb: 95, 180, 240;
+  --bs-link-hover-color: var(--ada-azul-noche-hover);
+  --bs-link-hover-color-rgb: 140, 202, 245;
+  --bs-primary: var(--ada-rojo);
+  --bs-primary-rgb: 227, 5, 19;
+}
+
+[data-bs-theme="dark"] body {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] a {
+  color: var(--ada-azul-noche);
+}
+
+[data-bs-theme="dark"] a:hover,
+[data-bs-theme="dark"] a:focus {
+  color: var(--ada-azul-noche-hover);
+}
+
+/* A black button would vanish on a dark page: use the red accent instead. */
+[data-bs-theme="dark"] .btn-primary {
+  --bs-btn-bg: var(--ada-rojo);
+  --bs-btn-border-color: var(--ada-rojo);
+  --bs-btn-hover-bg: var(--ada-rojo-oscuro);
+  --bs-btn-hover-border-color: var(--ada-rojo-oscuro);
+  --bs-btn-disabled-bg: var(--ada-rojo);
+  --bs-btn-disabled-border-color: var(--ada-rojo);
+}
+
+[data-bs-theme="dark"] .admin-ada,
+[data-bs-theme="dark"] .login-ada {
+  background-color: var(--ada-fondo-noche);
+}
+
+[data-bs-theme="dark"] .navbar-ada {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-bs-theme="dark"] .tarjeta-dashboard {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.5);
+}
+
+.boton-tema {
+  white-space: nowrap;
+}
+
 html,
 body,
 button,
